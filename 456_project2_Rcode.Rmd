@@ -1,0 +1,80 @@
+---
+title: "456 Project1 R code"
+author: ""
+date: "19/02/2022"
+output: html_document
+---
+
+``{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tinytex)
+library(nycflights13)
+library(tidyverse)
+library(moderndive)
+library(skimr)
+library(gapminder)
+library(readxl)
+library(zoo)
+library(gridExtra)
+library(infer)
+knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 60), tidy = TRUE)
+```
+
+## Data Import
+
+```{r}
+stature_hand_foot <- read_csv("C:/Users/YangTang/Desktop/456/stature_hand_foot.csv")
+```
+
+
+#2
+```{r}
+model <- lm(height ~ hand_length + foot_length, data = stature_hand_foot)
+
+summary(model)
+confint(model)
+```
+
+```{r}
+ggplot(data = stature_hand_foot, mapping = aes(x = foot_length, y = height)) + geom_point() + labs(x = "FootLength(mm)", y = "Height(mm)", title = "FootLength Vs. Height") + geom_smooth(method = "lm", se = FALSE)
+
+```
+
+## Height with Foot
+
+```{r}
+ggplot(data = stature_hand_foot, mapping = aes(x = hand_length, y = height)) + geom_point() + labs(x = "Handlength(mm)", y = "Height(mm)", title = "HandLength Vs. Height") + geom_smooth(method = "lm", se = FALSE)
+```
+
+
+```{r}
+a <- stature_hand_foot %>% filter(idGen < 55)
+model_a <- lm(height ~ hand_length + foot_length, data = a)
+summary(model_a )
+confint(model_a )
+
+
+b <- stature_hand_foot %>% filter(idGen >= 55)
+
+ESS <- stature_hand_foot %>%
+  mutate(ESS = ((height - (hand_length * 3.3187 + foot_length * 2.5809 + 372.5568))^2))
+ESS %>%
+  summarize(sum = sum(ESS))
+TSS <- stature_hand_foot %>% mutate(mean_h = mean(height))
+TSS <- TSS %>%
+  mutate(TSS = (height - mean_h)^2)
+TSS %>%
+  summarize(sum = sum(TSS))
+
+
+stature_hand_foot %>%
+  summarize(mean = mean(height))
+  
+sigma(model)/mean(stature_hand_foot$height)
+
+```
